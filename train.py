@@ -1,7 +1,7 @@
 import torch
 from torch.optim import Adam
 from torchvision.utils import save_image
-from model import VariationalAutoEncoderWithCNN
+from model import get_model
 from loss import VAELoss
 import matplotlib.pyplot as plt
 from dataset import get_loaaders, test_dataset
@@ -11,11 +11,11 @@ from tqdm import tqdm
 
 train_loader, test_loader = get_loaaders(batch_size = 1024)
 vaeLoss = VAELoss()
-VAE = VariationalAutoEncoderWithCNN()
+VAE = get_model()
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 model = VAE.to(device=DEVICE)
 lr = 0.001
-EPOCHS = 20
+EPOCHS = 100
 generated_images = "./generated"
 optimizer = Adam(lr = lr, params= model.parameters())
 

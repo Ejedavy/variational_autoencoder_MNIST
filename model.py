@@ -82,6 +82,7 @@ class VariationalAutoEncoderWithCNN(nn.Module):
 
 class VAE(nn.Module):
     def __init__(self, hidden_size = 128, latent_size = 50):
+        super(VAE, self).__init__()
         self.hidden_size = hidden_size
         self.latent_size = latent_size
         self.fc1 = nn.Linear(784, 500)
@@ -89,12 +90,12 @@ class VAE(nn.Module):
         self.fc_mean = nn.Linear(hidden_size, latent_size)
         self.fc_log_var = nn.Linear(hidden_size, latent_size)
         self.fc3 = nn.Linear(latent_size, 500)
-        self.fc4 = nn.Linear(500, 754)
+        self.fc4 = nn.Linear(500, 784)
     
     def encode(self, x):
         x = x.view(-1, 784)
-        x = F.relu(self.fc1)
-        x = F.relu(self.fc2)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
         mean = self.fc_mean(x)
         log_var = self.fc_log_var(x)
         return mean, log_var
@@ -108,16 +109,16 @@ class VAE(nn.Module):
     def decode(self, x):
         x = F.relu(self.fc3(x))
         x = F.sigmoid(self.fc4(x))
-        x = x.reshape(1, 28, 28)
+        x = x.reshape((x.shape[0],1, 28, 28))
         return x
     
     def forward(self, x):
         mean, log_var = self.encode(x)
         latent = self.fn_reparameterize(mean, log_var)
-        return self.decode(latent)
+        return self.decode(latent), mean, log_var
 
 
-def load_model(type = "linear"):
+def get_model(type = "linear"):
     if type == "linear":
         return VAE()
     elif type == "convolution":
