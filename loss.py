@@ -8,16 +8,17 @@ learns a wider variance after the reparametrization trick.
 """
 
 class VAELoss(nn.Module):
-    def __init(self, *args , **kwargs):
+    def __init__(self, *args , **kwargs):
         super(VAELoss, self).__init__()
-        self.BCELoss = nn.BCELoss()
-        self.KLDivergence = self.KLDLoss()
+        self.BCELoss = nn.BCELoss(reduction='sum')
 
-    def KLDLoss(self):
-        return
+    def KLDLoss(self, **kwargs):
+        mean = kwargs['mean']
+        log_var = kwargs['log_var']
+        return 0.5 * torch.sum(log_var.exp()  + mean.pow(2) - 1 - log_var)
     
 
     def forward(self, prediction , target, **kwargs):
-        reconstruction_loss = self.BCELoss(prediction, target)
-        klLoss = self.KLDivergence(prediction, target, **kwargs)
+        reconstruction_loss = self.BCELoss(prediction.view(-1, 784), target.view(-1, 784))
+        klLoss = self.KLDLoss(**kwargs)
         return reconstruction_loss + klLoss

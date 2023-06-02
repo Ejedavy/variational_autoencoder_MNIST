@@ -8,7 +8,7 @@ class CNNBlock(nn.Module):
         super(CNNBlock, self).__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, bias=False, **kwargs)
         self.batchnorm = nn.BatchNorm2d(out_channels)
-        self.activation = nn.Mish()
+        self.activation = nn.ReLU()
 
     def forward(self, x):
         return self.activation(self.batchnorm(self.conv(x)))
@@ -22,7 +22,7 @@ class FinalTransposeConvolution(nn.Module):
         self.transpose2 = nn.ConvTranspose2d(128, 32, kernel_size=(2, 2), stride= (2,2), padding=0)
         self.normalize2 = nn.BatchNorm2d(32)
         self.unit_conv = nn.Conv2d(32, 1, kernel_size=1, stride=1, padding=0)
-        self.activation = nn.Mish()
+        self.activation = nn.ReLU()
 
     def forward(self, x):
         x = x.reshape(x.shape[0], 10, 7, 7)
@@ -32,7 +32,7 @@ class FinalTransposeConvolution(nn.Module):
 
 
 class VariationalAutoEncoderWithCNN(nn.Module):
-    def __init__(self, latent_size = 5, input_size =(1, 28,28)):
+    def __init__(self, latent_size = 40, input_size =(1, 28,28)):
         super(VariationalAutoEncoderWithCNN, self).__init__()
         self.input_size = input_size
         self.latent_size = latent_size
@@ -63,7 +63,9 @@ class VariationalAutoEncoderWithCNN(nn.Module):
         transposed_conv = FinalTransposeConvolution()
         layers = [
             nn.Linear(self.latent_size, 128),
+            nn.ReLU(),
             nn.Linear(128, 490),
+            nn.ReLU(),
             transposed_conv,
         ]
         return nn.Sequential(*layers)
